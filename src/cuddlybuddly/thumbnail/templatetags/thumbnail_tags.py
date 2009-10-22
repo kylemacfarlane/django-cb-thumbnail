@@ -11,7 +11,7 @@ register = template.Library()
 class ThumbnailNode(template.Node):
     def __init__(self, source, width, height, quality=None, dest=None,
                  as_var=None):
-        self.source = template.Variable(source)
+        self.image_source = template.Variable(source)
         self.width = template.Variable(width)
         self.height = template.Variable(height)
         if quality is not None and quality != 'None':
@@ -25,8 +25,9 @@ class ThumbnailNode(template.Node):
         self.as_var = as_var
 
     def render(self, context):
+        print type(self.image_source)
         vars = {
-            'source': self.source.resolve(context),
+            'source': self.image_source.resolve(context),
             'width': self.width.resolve(context),
             'height': self.height.resolve(context)
         }
