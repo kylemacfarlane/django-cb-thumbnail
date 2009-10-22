@@ -324,10 +324,7 @@ class TemplateTests(BaseTest):
             self.images_to_delete.add(path)
         image.delete()
 
-    def test_silent_failures_without_debug(self):
-        debug_on = True if settings.DEBUG else False
-        if debug_on:
-            settings.DEBUG = False
+    def test_silent_failure(self):
         tests = {
             '{% thumbnail "'+RELATIVE_PIC_NAME+'missing" 51 51 %}': '',
             '{% thumbnail "'+RELATIVE_PIC_NAME+'" "a" 51 %}': '',
@@ -336,8 +333,6 @@ class TemplateTests(BaseTest):
             if type(val).__name__ == 'str':
                 val = (val, None)
             self.assertEqual(self.render_template(name, val[1]), val[0])
-        if debug_on:
-            settings.DEBUG = True
 
 
 class ModelsTests(BaseTest):

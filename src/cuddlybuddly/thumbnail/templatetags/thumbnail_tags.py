@@ -37,10 +37,7 @@ class ThumbnailNode(template.Node):
         try:
             thumb = Thumbnail(**vars)
         except:
-            if settings.DEBUG:
-                raise
-            else:
-                thumb = ''
+            thumb = ''
         else:
             thumb = force_unicode(thumb).replace(settings.MEDIA_ROOT, '')
             thumb = iri_to_uri('/'.join(thumb.strip('\\/').split(os.sep)))
@@ -59,7 +56,7 @@ def do_thumbnail(parser, token):
 
         {% thumbnail source width height [quality] [destination] %}
 
-    Source and destination can be a file like object or a string to a path.
+    Source and destination can be a file like object or a path as a string.
     """
 
     split_token = token.split_contents()
