@@ -32,6 +32,11 @@ CACHE_DIR = os.path.join(settings.MEDIA_ROOT, 'cbttestcache')
 
 class BaseTest(TestCase):
     def setUp(self):
+        self.installed_apps = settings.INSTALLED_APPS
+        settings.INSTALLED_APPS.append('cuddlybuddly.thumbnail.tests.cbtfakeapp')
+        load_app('cuddlybuddly.thumbnail.tests.cbtfakeapp')
+        call_command('syncdb', verbosity=0, interactive=False)
+
         self.images_to_delete = set()
         self.cache_to_delete = set()
         file = StringIO()
@@ -96,6 +101,8 @@ class BaseTest(TestCase):
         return Template(source).render(context)
 
     def tearDown(self):
+        settings.INSTALLED_APPS = self.installed_apps
+
         for image in self.images_to_delete:
             try:
                 default_storage.delete(image)
@@ -264,6 +271,9 @@ class TemplateTests(BaseTest):
             self.assertRaises(TemplateSyntaxError, self.render_template, test)
 
     def test_good_values(self):
+        image = FakeImage(image=RELATIVE_PIC_NAME, misc=1)
+        image.save()
+
         basedir = getattr(settings, 'CUDDLYBUDDLY_THUMBNAIL_BASEDIR', '')
         subdir = getattr(settings, 'CUDDLYBUDDLY_THUMBNAIL_SUBDIR', '')
         tests = {
@@ -285,6 +295,14 @@ class TemplateTests(BaseTest):
                     'quality': 88,
                     'dest': 'cb-thumbnail-test_jpg_templatevars.jpg'
                 }),
+            '{% thumbnail source.image width height quality dest as thumb %}{{ thumb }}':
+                ('', 'cb-thumbnail-test_jpg_field.jpg', {
+                    'source': image,
+                    'width': 67,
+                    'height': 78,
+                    'quality': 88,
+                    'dest': 'cb-thumbnail-test_jpg_field.jpg'
+                }),
         }
         for name, val in tests.items():
             if len(val) == 2:
@@ -301,7 +319,10 @@ class TemplateTests(BaseTest):
             self.cache_to_delete.add(cache)
             path = path.replace('\\', '/')
             self.assertEqual(self.render_template(name, val[2]), path)
-            self.images_to_delete.add(os.path.join(settings.MEDIA_ROOT, path))
+            path = os.path.join(settings.MEDIA_ROOT, path)
+            self.assert_(default_storage.exists(path))
+            self.images_to_delete.add(path)
+        image.delete()
 
     def test_silent_failures_without_debug(self):
         debug_on = True if settings.DEBUG else False
@@ -320,13 +341,6 @@ class TemplateTests(BaseTest):
 
 
 class ModelsTests(BaseTest):
-    def setUp(self):
-        super(ModelsTests, self).setUp()
-        self.installed_apps = settings.INSTALLED_APPS
-        settings.INSTALLED_APPS.append('cuddlybuddly.thumbnail.tests.cbtfakeapp')
-        load_app('cuddlybuddly.thumbnail.tests.cbtfakeapp')
-        call_command('syncdb', verbosity=0, interactive=False)
-
     def test_autodiscover(self):
         thumbnail.autodiscover()
         image = FakeImage(image=RELATIVE_PIC_NAME, misc=1)
@@ -351,7 +365,3 @@ class ModelsTests(BaseTest):
 
         image.delete()
         self.assert_(not os.path.exists(cache), 'Should not exist: %s' % cache)
-
-    def tearDown(self):
-        super(ModelsTests, self).tearDown()
-        settings.INSTALLED_APPS = self.installed_apps
