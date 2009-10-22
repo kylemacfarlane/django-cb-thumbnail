@@ -33,7 +33,7 @@ An optional location on your local disk to store a cache to increase performance
 
 Save thumbnail images to a directory directly off ``MEDIA_ROOT``, still keeping the relative directory structure of the source image.
 
-    THUMBNAIL_BASEDIR = '_thumbs'
+    CUDDLYBUDDLY_THUMBNAIL_BASEDIR = '_thumbs' 
 
 Results in:
 
@@ -45,7 +45,7 @@ Results in:
 
 Save thumbnail images to a sub-directory relative to the source image.
 
-    THUMBNAIL_SUBDIR = '_thumbs'
+    CUDDLYBUDDLY_THUMBNAIL_SUBDIR = '_thumbs'
 
 Results in:
 
