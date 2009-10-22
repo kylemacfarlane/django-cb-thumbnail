@@ -37,7 +37,7 @@ Save thumbnail images to a directory directly off ``MEDIA_ROOT``, still keeping 
 
 Results in:
 
-    MEDIA_ROOT + 'thumbs/photos/1_jpg_150x150_q85.jpg'
+    MEDIA_ROOT + '_thumbs/photos/1_jpg_150x150_q85.jpg'
 
 
 ``CUDDLYBUDDLY_THUMBNAIL_SUBDIR``
