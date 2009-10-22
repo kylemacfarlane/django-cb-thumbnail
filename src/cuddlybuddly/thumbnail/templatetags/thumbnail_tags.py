@@ -25,7 +25,6 @@ class ThumbnailNode(template.Node):
         self.as_var = as_var
 
     def render(self, context):
-        print type(self.image_source)
         vars = {
             'source': self.image_source.resolve(context),
             'width': self.width.resolve(context),
