@@ -25,7 +25,7 @@ except NameError:
 
 
 RELATIVE_PIC_NAME = "cb-thumbnail-test.jpg"
-PIC_NAME = os.path.join(settings.MEDIA_ROOT, RELATIVE_PIC_NAME)
+PIC_NAME = RELATIVE_PIC_NAME
 PIC_SIZE = (800, 600)
 CACHE_DIR = os.path.join(settings.MEDIA_ROOT, 'cbttestcache')
 
@@ -219,14 +219,10 @@ class ThumbnailTests(BaseTest):
 
     def test_generate_from_unicode_filename(self):
         unicode_name = u'cb-thumbnail-test_jpg_\u00A3.jpg'
-        path = os.path.join(
-            settings.MEDIA_ROOT,
-            unicode_name
-        )
-        file = default_storage.open(path, 'wb')
+        file = default_storage.open(unicode_name, 'wb')
         Image.new('RGB', PIC_SIZE).save(file, 'JPEG')
         file.close()
-        self.images_to_delete.add(path)
+        self.images_to_delete.add(unicode_name)
         cache = os.path.join(
             settings.CUDDLYBUDDLY_THUMBNAIL_CACHE,
             md5_constructor(smart_str(unicode_name)).hexdigest()
@@ -245,9 +241,7 @@ class ThumbnailTests(BaseTest):
         thumb = Thumbnail(RELATIVE_PIC_NAME, 80, 60, dest=dest2)
         self.verify_thumb(thumb, 80, 60, 'alt2.png')
 
-        dest = os.path.join(settings.MEDIA_ROOT, dest)
         dest = default_storage.open(dest)
-        dest2 = os.path.join(settings.MEDIA_ROOT, dest2)
         dest2 = default_storage.open(dest2)
         self.assertNotEqual(dest.size, dest2.size)
         dest.close()
@@ -319,7 +313,6 @@ class TemplateTests(BaseTest):
             self.cache_to_delete.add(cache)
             path = path.replace('\\', '/')
             self.assertEqual(self.render_template(name, val[2]), path)
-            path = os.path.join(settings.MEDIA_ROOT, path)
             self.assert_(default_storage.exists(path))
             self.images_to_delete.add(path)
         image.delete()

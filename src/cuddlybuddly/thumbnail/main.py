@@ -30,22 +30,12 @@ def build_thumbnail_name(source, width, height, quality):
 
 class Thumbnail(object):
     def __init__(self, source, width, height, quality=85, dest=None):
-        if isinstance(source, basestring):
-            self.source = os.path.join(settings.MEDIA_ROOT, source)
-            self.relative_source = source
-        else:
-            self.source = source
+        self.source = source
         self.width = width
         self.height = height
         self.quality = quality
         if dest is None:
             dest = build_thumbnail_name(source, width, height, quality)
-            self.relative_dest = dest
-            if isinstance(source, basestring):
-                dest = os.path.join(settings.MEDIA_ROOT, dest)
-        elif isinstance(dest, basestring):
-            self.relative_dest = dest
-            dest = os.path.join(settings.MEDIA_ROOT, dest)
         self.dest = dest
         self.cache_dir = getattr(settings, 'CUDDLYBUDDLY_THUMBNAIL_CACHE', None)
 
@@ -58,7 +48,7 @@ class Thumbnail(object):
         self.generate()
 
     def __unicode__(self):
-        return force_unicode(self.relative_dest)
+        return force_unicode(self.dest)
 
     def generate(self):
         if hasattr(self.dest, 'write'):
@@ -73,14 +63,14 @@ class Thumbnail(object):
                     source = pickle.dumps(self.source.read())
                     self.source.seek(0)
                 else:
-                    source = smart_str(force_unicode(self.relative_source))
+                    source = smart_str(force_unicode(self.source))
                 source = os.path.join(self.cache_dir,
                                       md5_constructor(source).hexdigest())
                 if not isinstance(self.dest, basestring):
                     dest = pickle.dumps(self.dest.read())
                     self.dest.seek(0)
                 else:
-                    dest = smart_str(force_unicode(self.relative_dest))
+                    dest = smart_str(force_unicode(self.dest))
                 dest = os.path.join(self.cache_dir,
                                       md5_constructor(dest).hexdigest())
             else:
