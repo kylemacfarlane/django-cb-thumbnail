@@ -77,7 +77,12 @@ class Thumbnail(object):
                 source = force_unicode(self.source)
                 dest = self.dest
             try:
-                if os.path.getmtime(source) > os.path.getmtime(dest):
+                if self.cache_dir is None and \
+                   hasattr(default_storage, 'getmtime'):
+                    method = default_storage.getmtime
+                else:
+                    method = os.path.getmtime
+                if method(source) > method(dest):
                     do_generate = True
             except OSError:
                 do_generate = True
