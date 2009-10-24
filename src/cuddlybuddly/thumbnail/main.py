@@ -81,7 +81,7 @@ class Thumbnail(object):
                 do_generate = default_storage.getmtime(source) > \
                         default_storage.getmtime(dest)
             else:
-                if self.cache_dir:
+                if not self.cache_dir:
                     source_cache = os.path.join(settings.MEDIA_ROOT, source)
                     dest_cache = os.path.join(settings.MEDIA_ROOT, dest)
                 else:
