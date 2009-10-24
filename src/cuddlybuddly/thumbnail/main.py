@@ -76,16 +76,22 @@ class Thumbnail(object):
             else:
                 source = force_unicode(self.source)
                 dest = self.dest
-            try:
-                if self.cache_dir is None and \
-                   hasattr(default_storage, 'getmtime'):
-                    method = default_storage.getmtime
+
+            if hasattr(default_storage, 'getmtime') and not self.cache_dir:
+                do_generate = default_storage.getmtime(source) > \
+                        default_storage.getmtime(dest)
+            else:
+                if self.cache_dir:
+                    source_cache = os.path.join(settings.MEDIA_ROOT, source)
+                    dest_cache = os.path.join(settings.MEDIA_ROOT, dest)
                 else:
-                    method = os.path.getmtime
-                if method(source) > method(dest):
+                    source_cache, dest_cache = source, dest
+                try:
+                    do_generate = os.path.getmtime(source_cache) > \
+                            os.path.getmtime(dest_cache)
+                except OSError:
                     do_generate = True
-            except OSError:
-                do_generate = True
+
             if do_generate:
                 if self.cache_dir is not None:
                     for filename in (source, dest):
