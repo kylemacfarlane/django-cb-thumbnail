@@ -255,9 +255,9 @@ class ThumbnailTests(BaseTest):
 class TemplateTests(BaseTest):
     def test_bad_values(self):
         tests = (
-            '{% thumbnai %}',
-            '{% thumbnai "a" %}',
-            '{% thumbnai "a" 1 %}',
+            '{% thumbnail %}',
+            '{% thumbnail "a" %}',
+            '{% thumbnail "a" 1 %}',
             '{% thumbnail "a" as %}',
             '{% thumbnail "a" 80 60 as %}',
         )
