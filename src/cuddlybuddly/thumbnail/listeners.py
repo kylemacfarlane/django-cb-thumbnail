@@ -9,9 +9,9 @@ def update_cache(sender, instance, **kwargs):
     for field in instance.__dict__.keys():
         field = getattr(instance, field)
         if isinstance(field, FieldFile):
-            cache_dir = getattr(settings, 'CUDDLYBUDDLY_THUMBNAIL_CACHE', '')
+            cache_dir = getattr(settings, 'CUDDLYBUDDLY_THUMBNAIL_CACHE', None)
             field = force_unicode(field)
-            if field:
+            if field and cache_dir is not None:
                 cache = os.path.join(
                     cache_dir,
                     md5_constructor(field).hexdigest()
