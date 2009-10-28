@@ -28,15 +28,13 @@ RELATIVE_PIC_NAME = "cb-thumbnail-test.jpg"
 PIC_NAME = RELATIVE_PIC_NAME
 PIC_SIZE = (800, 600)
 CACHE_DIR = os.path.join(settings.MEDIA_ROOT, 'cbttestcache')
+settings.INSTALLED_APPS.append('cuddlybuddly.thumbnail.tests.cbtfakeapp')
+load_app('cuddlybuddly.thumbnail.tests.cbtfakeapp')
+call_command('syncdb', verbosity=0, interactive=False)
 
 
 class BaseTest(TestCase):
     def setUp(self):
-        self.installed_apps = settings.INSTALLED_APPS
-        settings.INSTALLED_APPS.append('cuddlybuddly.thumbnail.tests.cbtfakeapp')
-        load_app('cuddlybuddly.thumbnail.tests.cbtfakeapp')
-        call_command('syncdb', verbosity=0, interactive=False)
-
         self.images_to_delete = set()
         self.cache_to_delete = set()
         file = StringIO()
@@ -101,8 +99,6 @@ class BaseTest(TestCase):
         return Template(source).render(context)
 
     def tearDown(self):
-        settings.INSTALLED_APPS = self.installed_apps
-
         for image in self.images_to_delete:
             try:
                 default_storage.delete(image)
