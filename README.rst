@@ -26,7 +26,7 @@ Settings
 ``CUDDLYBUDDLY_THUMBNAIL_CACHE``
 --------------------------------
 
-An optional location on your local disk to store a cache to increase performance when using remote storage systems.
+An optional location on your local disk to store a cache to increase performance when using remote storage systems. Do not use this if your remote storage system has its own cache as this feature is basically just a mass of signals that could go wrong. For example, ``django-cuddlybuddly-storage-s3`` has its own proper cache at the storage level.
 
 ``CUDDLYBUDDLY_THUMBNAIL_BASEDIR``
 ----------------------------------

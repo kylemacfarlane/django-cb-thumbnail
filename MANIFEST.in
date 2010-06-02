@@ -1,0 +1,4 @@
+include bootstrap.py
+include buildout.cfg
+include LICENSE
+include README.rst

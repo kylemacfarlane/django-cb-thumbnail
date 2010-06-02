@@ -6,12 +6,12 @@ def read(fname):
 
 setup(
     name = 'django-cuddlybuddly-thumbnail',
-    version = '1.0.8',
+    version = '1.0.9',
     license = 'BSD',
-    description = 'A Django app that supplies a template tag to generate \
-                   thumbnails. Specifically designed to be compatible with \
-                   properly implemented Django storage systems, which \
-                   unfortunately most are not.',
+    description = 'A Django app that supplies a template tag to generate '
+                  'thumbnails. Specifically designed to be compatible with '
+                  'properly implemented Django storage systems, which '
+                  'unfortunately most are not.',
     long_description = read('README.rst'),
     author = 'Kyle MacFarlane',
     author_email = 'kyle@deletethetrees.com',

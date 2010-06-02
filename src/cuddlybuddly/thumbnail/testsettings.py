@@ -19,7 +19,7 @@ INSTALLED_APPS = [
     'django.contrib.sites'
 ]
 SITE_ID = 1
-ROOT_URLCONF = 'cuddlybuddly.thumbnail.testurls'
+ROOT_URLCONF = 'cuddlybuddly.thumbnail.tests.urls'
 MEDIA_ROOT = TEMP+'/cbttest'
 MEDIA_URL = '/media/'
 CUDDLYBUDDLY_THUMBNAIL_BASEDIR = 'basedir'
