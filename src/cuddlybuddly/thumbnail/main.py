@@ -1,6 +1,9 @@
 import os
 import pickle
-from PIL import Image
+try:
+    from PIL import Image
+except ImportError:
+    import Image
 try:
     from cStringIO import StringIO
 except ImportError:

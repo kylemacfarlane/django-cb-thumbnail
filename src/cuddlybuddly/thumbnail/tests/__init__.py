@@ -3,7 +3,10 @@ try:
     from cStringIO import StringIO
 except ImportError:
     from StringIO import StringIO
-from PIL import Image
+try:
+    from PIL import Image
+except ImportError:
+    import Image
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
