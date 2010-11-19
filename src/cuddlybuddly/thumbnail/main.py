@@ -14,39 +14,41 @@ from django.core.files.storage import default_storage
 from django.db.models.fields.files import FieldFile
 from django.utils.encoding import force_unicode, smart_str
 from django.utils.hashcompat import md5_constructor
+from cuddlybuddly.thumbnail import get_processor
 from cuddlybuddly.thumbnail.exceptions import ThumbnailException
 
 
-def build_thumbnail_name(source, width, height, quality):
+def build_thumbnail_name(source, width, height, processor):
     source = force_unicode(source)
     path, filename = os.path.split(source)
-    basename, ext = os.path.splitext(filename)
-    name = '%s%s' % (basename, ext.replace(os.extsep, '_'))
-    thumbnail = '%s_%sx%s_q%s%s' % (name, width, height, quality, ext)
+    filename = processor.generate_filename(filename, width, height)
     return os.path.join(
         getattr(settings, 'CUDDLYBUDDLY_THUMBNAIL_BASEDIR', ''),
         path,
         getattr(settings, 'CUDDLYBUDDLY_THUMBNAIL_SUBDIR', ''),
-        thumbnail
+        filename
     )
 
 
 class Thumbnail(object):
-    def __init__(self, source, width, height, quality=85, dest=None):
+    def __init__(self, source, width, height, dest=None, proc=None, *args,
+                 **kwargs):
         self.source = source
         self.width = width
         self.height = height
-        self.quality = quality
+        self.processor = get_processor(proc)(*args, **kwargs)
         if dest is None:
-            dest = build_thumbnail_name(source, width, height, quality)
+            dest = build_thumbnail_name(source, width, height, self.processor)
         self.dest = dest
         self.cache_dir = getattr(settings, 'CUDDLYBUDDLY_THUMBNAIL_CACHE', None)
 
-        for var in ('width', 'height', 'quality'):
+        for var in ('width', 'height'):
             try:
                 setattr(self, var, int(getattr(self, var)))
             except ValueError:
                 raise ThumbnailException('Value supplied for \'%s\' is not an int' % var)
+        if self.processor is None:
+            raise ThumbnailException('There is no image processor available')
 
         self.generate()
 
@@ -97,7 +99,7 @@ class Thumbnail(object):
 
             if do_generate:
                 if self.cache_dir is not None:
-                    for filename in (source, dest):
+                    for filename in [source, dest]:
                         path = os.path.split(filename)[0]
                         if not os.path.exists(path):
                             os.makedirs(path)
@@ -137,39 +139,28 @@ class Thumbnail(object):
 
         filelike = hasattr(self.dest, 'write')
         if not filelike:
-            format = os.path.splitext(self.dest)[1][1:]
-            format = format.upper().replace('JPG', 'JPEG')
             dest = StringIO()
         else:
-            format = 'JPEG'
             dest = self.dest
 
-        x, y = [float(v) for v in data.size]
-        xr, yr = [float(v) for v in (self.width, self.height)]
-        r = min(xr / x, yr / y)
-        if r < 1.0:
-            data = data.resize((int(x * r), int(y * r)),
-                               resample=Image.ANTIALIAS)
-        if data.mode not in ("L", "RGB", "RGBA"):
-            data = data.convert("RGB")
+        data = self.processor.generate_thumbnail(data, self.width, self.height)
 
+        filename = force_unicode(self.dest)
         try:
-            data.save(dest, format=format, quality=self.quality,
-                      optimize=1)
+            data.save(dest, optimize=1, **self.processor.get_save_options(filename, data))
         except IOError:
             # Try again, without optimization (PIL can't optimize an image
             # larger than ImageFile.MAXBLOCK, which is 64k by default)
             try:
-                data.save(dest, format=format, quality=self.quality)
-            except IOError, detail:
-                raise ThumbnailException(detail)
+                data.save(dest, **self.processor.get_save_options(filename, data))
+            except IOError, e:
+                raise ThumbnailException(e)
 
         if hasattr(self.source, 'seek'):
             self.source.seek(0)
         if filelike:
             dest.seek(0)
         else:
-            filename = force_unicode(self.dest)
             if default_storage.exists(filename):
                 default_storage.delete(filename)
             default_storage.save(filename, ContentFile(dest.getvalue()))

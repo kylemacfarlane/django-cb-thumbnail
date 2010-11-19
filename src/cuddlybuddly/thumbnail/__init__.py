@@ -1,4 +1,30 @@
+from cuddlybuddly.thumbnail.processors import CropToFitProcessor, \
+    ResizeProcessor
+
+
 LOADING = False
+PROCESSORS = {
+    'crop': CropToFitProcessor,
+    'resize': ResizeProcessor
+}
+DEFAULT_PROCESSOR = ResizeProcessor
+
+
+def register_processor(name, processor, default=False):
+    global PROCESSORS
+    PROCESSORS[name] = processor
+    if default:
+        global DEFAULT_PROCESSOR
+        DEFAULT_PROCESSOR = processor
+
+
+def get_processor(name):
+    return PROCESSORS.get(name, DEFAULT_PROCESSOR)
+
+
+def get_default_processor():
+    return DEFAULT_PROCESSOR
+
 
 def autodiscover():
     from django.conf import settings

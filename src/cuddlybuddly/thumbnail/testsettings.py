@@ -13,6 +13,7 @@ INSTALLED_APPS = [
     'cuddlybuddly.thumbnail',
     'cuddlybuddly.storage.s3',
     'django.contrib.admin',
+    'django.contrib.admindocs',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -30,3 +31,7 @@ try:
     from cuddlybuddly.thumbnail.tests3settings import *
 except ImportError:
     pass
+
+# Because PIL is crazy and I want to check my docstrings in admindocs
+import PIL.Image
+sys.modules['Image'] = PIL.Image
