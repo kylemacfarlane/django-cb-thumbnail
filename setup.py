@@ -6,7 +6,7 @@ def read(fname):
 
 setup(
     name = 'django-cuddlybuddly-thumbnail',
-    version = '2.0',
+    version = '2.1',
     license = 'BSD',
     description = 'A Django app that supplies a template tag to generate ' \
                   'thumbnails. Specifically designed to be compatible with ' \
