@@ -71,6 +71,11 @@ class Thumbnail(object):
                     source = smart_str(force_unicode(self.source))
                 source = os.path.join(self.cache_dir,
                                       md5_constructor(source).hexdigest())
+                if not os.path.exists(source):
+                    path = os.path.split(source)[0]
+                    if not os.path.exists(path):
+                        os.makedirs(path)
+                    open(source, 'w').close()
                 if not isinstance(self.dest, basestring):
                     dest = pickle.dumps(self.dest.read())
                     self.dest.seek(0)
@@ -99,18 +104,16 @@ class Thumbnail(object):
 
             if do_generate:
                 if self.cache_dir is not None:
-                    for filename in [source, dest]:
-                        path = os.path.split(filename)[0]
-                        if not os.path.exists(path):
-                            os.makedirs(path)
-                        open(filename, 'w').close()
+                    path = os.path.split(dest)[0]
+                    if not os.path.exists(path):
+                        os.makedirs(path)
+                    open(dest, 'w').close()
                 try:
                     self._do_generate()
                 except:
                     if self.cache_dir is not None:
-                        for filename in (source, dest):
-                            if os.path.exists(filename):
-                                os.remove(filename)
+                        if os.path.exists(dest):
+                            os.remove(dest)
                     raise
 
     def _do_generate(self):

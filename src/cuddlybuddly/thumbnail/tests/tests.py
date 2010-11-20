@@ -184,6 +184,11 @@ class ThumbnailTests(BaseTest):
         self.assertRaises(ThumbnailException, Thumbnail, '', 'a', 1)
         self.assertRaises(ThumbnailException, Thumbnail, '', 1, 'a')
         self.assertRaises(ThumbnailException, Thumbnail, '', 1, 1, 'a')
+        cache = os.path.join(
+            settings.CUDDLYBUDDLY_THUMBNAIL_CACHE,
+            md5_constructor(smart_str('')).hexdigest()
+        )
+        self.cache_to_delete.add(cache)
 
     def test_generate_from_string(self):
         thumb = Thumbnail(RELATIVE_PIC_NAME, 80, 60)
@@ -277,6 +282,55 @@ class ThumbnailTests(BaseTest):
     def test_missing_source(self):
         self.assertRaises(ThumbnailException,
                           Thumbnail, RELATIVE_PIC_NAME+'missing', 80, 60)
+        cache = os.path.join(
+            settings.CUDDLYBUDDLY_THUMBNAIL_CACHE,
+            md5_constructor(smart_str(RELATIVE_PIC_NAME+'missing')).hexdigest()
+        )
+        self.cache_to_delete.add(cache)
+
+    def test_multiple_thumbs_from_single_source(self):
+        source_cache = os.path.join(
+            settings.CUDDLYBUDDLY_THUMBNAIL_CACHE,
+            md5_constructor(smart_str(RELATIVE_PIC_NAME)).hexdigest()
+        )
+        self.assert_(not os.path.exists(source_cache))
+
+        thumb1 = '8x6_q85.jpg'
+        thumb1_cache = os.path.join(
+            self.MEDIA_MIDDLE,
+            'cb-thumbnail-test_jpg_%s' % thumb1
+        )
+        thumb1_cache = os.path.join(
+            settings.CUDDLYBUDDLY_THUMBNAIL_CACHE,
+            md5_constructor(smart_str(thumb1_cache)).hexdigest()
+        )
+        thumb = Thumbnail(RELATIVE_PIC_NAME, 8, 6)
+        self.verify_thumb(thumb, 8, 6, thumb1)
+        self.assert_(os.path.exists(source_cache))
+        self.assert_(os.path.exists(thumb1_cache))
+        source_cache_mtime1 = os.path.getmtime(source_cache)
+        thumb1_cache_mtime = os.path.getmtime(thumb1_cache)
+
+        thumb2 = '4x3_q85.jpg'
+        thumb2_cache = os.path.join(
+            self.MEDIA_MIDDLE,
+            'cb-thumbnail-test_jpg_%s' % thumb2
+        )
+        thumb2_cache = os.path.join(
+            settings.CUDDLYBUDDLY_THUMBNAIL_CACHE,
+            md5_constructor(smart_str(thumb2_cache)).hexdigest()
+        )
+        thumb = Thumbnail(RELATIVE_PIC_NAME, 4, 3)
+        self.verify_thumb(thumb, 4, 3, thumb2)
+        self.assert_(os.path.exists(source_cache))
+        self.assert_(os.path.exists(thumb1_cache))
+        self.assert_(os.path.exists(thumb2_cache))
+        source_cache_mtime2 = os.path.getmtime(source_cache)
+        thumb2_cache_mtime = os.path.getmtime(thumb2_cache)
+
+        self.assertEqual(source_cache_mtime1, source_cache_mtime2)
+        self.assert_(source_cache_mtime1 <= thumb1_cache)
+        self.assert_(source_cache_mtime2 <= thumb2_cache)
 
 
 class TemplateTests(BaseTest):
@@ -373,6 +427,11 @@ class TemplateTests(BaseTest):
             if type(val).__name__ == 'str':
                 val = (val, None)
             self.assertEqual(self.render_template(name, val[1]), val[0])
+        cache = os.path.join(
+            settings.CUDDLYBUDDLY_THUMBNAIL_CACHE,
+            md5_constructor(smart_str(RELATIVE_PIC_NAME+'missing')).hexdigest()
+        )
+        self.cache_to_delete.add(cache)
 
 
 class ModelsTests(BaseTest):
