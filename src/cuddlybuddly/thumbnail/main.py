@@ -87,7 +87,12 @@ class Thumbnail(object):
                 source = force_unicode(self.source)
                 dest = self.dest
 
-            if hasattr(default_storage, 'getmtime') and not self.cache_dir:
+            if hasattr(default_storage, 'modified_time') and not self.cache_dir:
+                do_generate = default_storage.modified_time(source) > \
+                        default_storage.modified_time(dest)
+            elif hasattr(default_storage, 'getmtime') and not self.cache_dir:
+                # An old custom method from before Django supported
+                # modified_time(). Kept around for backwards compatibility.
                 do_generate = default_storage.getmtime(source) > \
                         default_storage.getmtime(dest)
             else:
