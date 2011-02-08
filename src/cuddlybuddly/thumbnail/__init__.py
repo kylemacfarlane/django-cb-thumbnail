@@ -38,6 +38,7 @@ def autodiscover():
     LOADING = True
 
     import imp
+    from django.db.models import Model
     from django.db.models.base import ModelBase
     from django.db.models.fields.files import FieldFile
     from django.db.models.signals import post_save, pre_delete
@@ -57,7 +58,7 @@ def autodiscover():
 
         models = import_module("%s.models" % app)
         for model in models.__dict__.values():
-            if isinstance(model, ModelBase):
+            if isinstance(model, ModelBase) and model is not Model:
                 modelinit = model()
                 for field in modelinit.__dict__.keys():
                     if isinstance(getattr(modelinit, field, None), FieldFile):
