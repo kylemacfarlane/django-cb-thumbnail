@@ -104,7 +104,9 @@ def do_thumbnail(parser, token):
                 )
             name, value = match.groups()
             if name:
-                kwargs[name] = value
+                # Python < 2.7 does not accept unicode keywords.
+                # http://bugs.python.org/issue2646
+                kwargs[name.encode('utf-8')] = value
                 started_kwargs = True
             else:
                 if started_kwargs:
