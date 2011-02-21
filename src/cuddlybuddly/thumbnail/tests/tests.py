@@ -10,7 +10,6 @@ except ImportError:
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
-from django.core.management import call_command
 from django.db.models.loading import load_app
 from django.template import Context, Template, TemplateSyntaxError
 from django.test import TestCase
