@@ -46,7 +46,11 @@ class BaseTest(TestCase):
             # fail to create the permissions when some other third app is also
             # loaded.
             try:
-                call_command('syncdb', verbosity=0, interactive=False)
+                # Don't use call_command because if South is installed it
+                # overrides syncdb and unnecessary warnings are printed out
+                # during tests.
+                from django.core.management.commands import syncdb
+                syncdb.Command().handle_noargs(verbosity=0, interactive=False)
             except:
                 pass
 
