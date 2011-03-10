@@ -65,12 +65,6 @@ class BaseProcessor(object):
 
         Convert images to the correct color space.
 
-        A passive option (i.e. always processed) of this method is that all images
-        (unless grayscale) are converted to RGB colorspace.
-
-        This processor should be listed before :func:`scale_and_crop` so palette is
-        changed before the image is resized.
-
         bw
             Make the thumbnail grayscale (not really just black & white).
 
@@ -131,7 +125,6 @@ class ResizeProcessor(BaseProcessor):
                 (int(round(source_x * scale)), int(round(source_y * scale))),
                 resample=Image.ANTIALIAS
             )
-        image = self._colorspace(image)
         return image
 
 
@@ -150,7 +143,5 @@ class CropToFitProcessor(ResizeProcessor):
         return '%s_ctf%s' % (basename, ext)
 
     def generate_thumbnail(self, image, width, height):
-        image = super(CropToFitProcessor, self).generate_thumbnail(
-            image, width, height
-        )
+        image = self._colorspace(image)
         return ImageOps.fit(image, (width, height), Image.ANTIALIAS)
