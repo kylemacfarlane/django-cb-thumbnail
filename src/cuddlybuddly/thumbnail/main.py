@@ -88,13 +88,21 @@ class Thumbnail(object):
                 dest = self.dest
 
             if hasattr(default_storage, 'modified_time') and not self.cache_dir:
-                do_generate = default_storage.modified_time(source) > \
-                        default_storage.modified_time(dest)
-            elif hasattr(default_storage, 'getmtime') and not self.cache_dir:
-                # An old custom method from before Django supported
-                # modified_time(). Kept around for backwards compatibility.
-                do_generate = default_storage.getmtime(source) > \
-                        default_storage.getmtime(dest)
+                try:
+                    source_mod_time = default_storage.modified_time(source)
+                except EnvironmentError:
+                    # Means the source file doesn't exist, so nothing can be
+                    # done.
+                    do_generate = False
+                else:
+                    try:
+                        dest_mod_time = default_storage.modified_time(dest)
+                    except EnvironmentError:
+                        # Means the destination file doesn't exist so it must be
+                        # generated.
+                        do_generate = True
+                    else:
+                        do_generate = source_mod_time > dest_mod_time
             else:
                 if not self.cache_dir:
                     source_cache = os.path.join(settings.MEDIA_ROOT, source)
