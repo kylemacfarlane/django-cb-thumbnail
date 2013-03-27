@@ -1,3 +1,4 @@
+import hashlib
 import os
 try:
     from cStringIO import StringIO
@@ -14,7 +15,6 @@ from django.db.models.loading import load_app
 from django.template import Context, Template, TemplateSyntaxError
 from django.test import TestCase
 from django.utils.encoding import force_unicode, smart_str
-from django.utils.hashcompat import md5_constructor
 from cuddlybuddly import thumbnail
 from cuddlybuddly.thumbnail import CropToFitProcessor, ResizeProcessor
 from cuddlybuddly.thumbnail.exceptions import ThumbnailException
@@ -73,7 +73,7 @@ class BaseTest(TestCase):
                 self.delete_cache_dir = True
         cache = os.path.join(
             settings.CUDDLYBUDDLY_THUMBNAIL_CACHE,
-            md5_constructor(smart_str(RELATIVE_PIC_NAME)).hexdigest()
+            hashlib.md5(smart_str(RELATIVE_PIC_NAME)).hexdigest()
         )
         self.cache_to_delete.add(cache)
 
@@ -109,7 +109,7 @@ class BaseTest(TestCase):
 
             cache = os.path.join(
                 settings.CUDDLYBUDDLY_THUMBNAIL_CACHE,
-                md5_constructor(smart_str(cache)).hexdigest()
+                hashlib.md5(smart_str(cache)).hexdigest()
             )
             self.assert_(os.path.exists(cache), 'Does not exist: %s' % cache)
             self.cache_to_delete.add(cache)
@@ -189,7 +189,7 @@ class ThumbnailTests(BaseTest):
         self.assertRaises(ThumbnailException, Thumbnail, '', 1, 1, 'a')
         cache = os.path.join(
             settings.CUDDLYBUDDLY_THUMBNAIL_CACHE,
-            md5_constructor(smart_str('')).hexdigest()
+            hashlib.md5(smart_str('')).hexdigest()
         )
         self.cache_to_delete.add(cache)
 
@@ -207,7 +207,7 @@ class ThumbnailTests(BaseTest):
         self.verify_thumb(thumb, 40, 30, '40x30_q85.jpg')
         cache = os.path.join(
             settings.CUDDLYBUDDLY_THUMBNAIL_CACHE,
-            md5_constructor(force_unicode(file)).hexdigest()
+            hashlib.md5(force_unicode(file)).hexdigest()
         )
         self.cache_to_delete.add(cache)
         file.close()
@@ -242,7 +242,7 @@ class ThumbnailTests(BaseTest):
         self.assert_(not default_storage.exists(image))
         cache = os.path.join(
             settings.CUDDLYBUDDLY_THUMBNAIL_CACHE,
-            md5_constructor(smart_str(image)).hexdigest()
+            hashlib.md5(smart_str(image)).hexdigest()
         )
         self.assert_(not os.path.exists(cache))
 
@@ -260,7 +260,7 @@ class ThumbnailTests(BaseTest):
         self.images_to_delete.add(unicode_name)
         cache = os.path.join(
             settings.CUDDLYBUDDLY_THUMBNAIL_CACHE,
-            md5_constructor(smart_str(unicode_name)).hexdigest()
+            hashlib.md5(smart_str(unicode_name)).hexdigest()
         )
         self.cache_to_delete.add(cache)
         thumb = Thumbnail(unicode_name, 80, 60)
@@ -287,14 +287,14 @@ class ThumbnailTests(BaseTest):
                           Thumbnail, RELATIVE_PIC_NAME+'missing', 80, 60)
         cache = os.path.join(
             settings.CUDDLYBUDDLY_THUMBNAIL_CACHE,
-            md5_constructor(smart_str(RELATIVE_PIC_NAME+'missing')).hexdigest()
+            hashlib.md5(smart_str(RELATIVE_PIC_NAME+'missing')).hexdigest()
         )
         self.cache_to_delete.add(cache)
 
     def test_multiple_thumbs_from_single_source(self):
         source_cache = os.path.join(
             settings.CUDDLYBUDDLY_THUMBNAIL_CACHE,
-            md5_constructor(smart_str(RELATIVE_PIC_NAME)).hexdigest()
+            hashlib.md5(smart_str(RELATIVE_PIC_NAME)).hexdigest()
         )
         self.assert_(not os.path.exists(source_cache))
 
@@ -305,7 +305,7 @@ class ThumbnailTests(BaseTest):
         )
         thumb1_cache = os.path.join(
             settings.CUDDLYBUDDLY_THUMBNAIL_CACHE,
-            md5_constructor(smart_str(thumb1_cache)).hexdigest()
+            hashlib.md5(smart_str(thumb1_cache)).hexdigest()
         )
         thumb = Thumbnail(RELATIVE_PIC_NAME, 8, 6)
         self.verify_thumb(thumb, 8, 6, thumb1)
@@ -321,7 +321,7 @@ class ThumbnailTests(BaseTest):
         )
         thumb2_cache = os.path.join(
             settings.CUDDLYBUDDLY_THUMBNAIL_CACHE,
-            md5_constructor(smart_str(thumb2_cache)).hexdigest()
+            hashlib.md5(smart_str(thumb2_cache)).hexdigest()
         )
         thumb = Thumbnail(RELATIVE_PIC_NAME, 4, 3)
         self.verify_thumb(thumb, 4, 3, thumb2)
@@ -412,7 +412,7 @@ class TemplateTests(BaseTest):
             path = os.path.join(path, val[1])
             cache = os.path.join(
                 settings.CUDDLYBUDDLY_THUMBNAIL_CACHE,
-                md5_constructor(smart_str(path)).hexdigest()
+                hashlib.md5(smart_str(path)).hexdigest()
             )
             self.cache_to_delete.add(cache)
             path = path.replace('\\', '/')
@@ -432,7 +432,7 @@ class TemplateTests(BaseTest):
             self.assertEqual(self.render_template(name, val[1]), val[0])
         cache = os.path.join(
             settings.CUDDLYBUDDLY_THUMBNAIL_CACHE,
-            md5_constructor(smart_str(RELATIVE_PIC_NAME+'missing')).hexdigest()
+            hashlib.md5(smart_str(RELATIVE_PIC_NAME+'missing')).hexdigest()
         )
         self.cache_to_delete.add(cache)
 
@@ -447,7 +447,7 @@ class ModelsTests(BaseTest):
         self.verify_thumb(thumb, 20, 15, '20x15_q85.jpg')
         cache = os.path.join(
             settings.CUDDLYBUDDLY_THUMBNAIL_CACHE,
-            md5_constructor(force_unicode(image.image)).hexdigest()
+            hashlib.md5(force_unicode(image.image)).hexdigest()
         )
         self.assert_(os.path.exists(cache), 'Does not exist: %s' % cache)
         self.cache_to_delete.add(cache)

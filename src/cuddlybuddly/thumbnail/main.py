@@ -1,3 +1,4 @@
+import hashlib
 import os
 import pickle
 try:
@@ -13,7 +14,6 @@ from django.core.files.base import ContentFile, File
 from django.core.files.storage import default_storage
 from django.db.models.fields.files import FieldFile
 from django.utils.encoding import force_unicode, smart_str
-from django.utils.hashcompat import md5_constructor
 from cuddlybuddly.thumbnail import get_processor
 from cuddlybuddly.thumbnail.exceptions import ThumbnailException
 
@@ -70,7 +70,7 @@ class Thumbnail(object):
                 else:
                     source = smart_str(force_unicode(self.source))
                 source = os.path.join(self.cache_dir,
-                                      md5_constructor(source).hexdigest())
+                                      hashlib.md5(source).hexdigest())
                 if not os.path.exists(source):
                     path = os.path.split(source)[0]
                     if not os.path.exists(path):
@@ -82,7 +82,7 @@ class Thumbnail(object):
                 else:
                     dest = smart_str(force_unicode(self.dest))
                 dest = os.path.join(self.cache_dir,
-                                      md5_constructor(dest).hexdigest())
+                                      hashlib.md5(dest).hexdigest())
             else:
                 source = force_unicode(self.source)
                 dest = self.dest

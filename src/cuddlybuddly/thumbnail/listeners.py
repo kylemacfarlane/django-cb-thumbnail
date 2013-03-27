@@ -1,8 +1,8 @@
+import hashlib
 import os
 from django.conf import settings
 from django.db.models.fields.files import FieldFile
 from django.utils.encoding import force_unicode
-from django.utils.hashcompat import md5_constructor
 
 
 def update_cache(sender, instance, **kwargs):
@@ -14,7 +14,7 @@ def update_cache(sender, instance, **kwargs):
             if field and cache_dir is not None:
                 cache = os.path.join(
                     cache_dir,
-                    md5_constructor(field).hexdigest()
+                    hashlib.md5(field).hexdigest()
                 )
                 if os.path.exists(cache):
                     os.remove(cache)
